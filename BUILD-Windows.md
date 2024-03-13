@@ -1,8 +1,8 @@
 # Build (Windows)
 
 To build the dependencies & the project itself, The following must be installed:
-- Microsoft Visual Studio 2019 (VS2019)
-- CMake
+- Microsoft Visual Studio 2019/2022 (VS2019/VS2022)
+- [CMake](https://cmake.org/)
 
 
 ## Dependencies
@@ -26,17 +26,17 @@ b2
 ### [Crypto++](https://cryptopp.com/)
 
 1. Go to `cryptopp`.
-2. Use VS2019 to open `cryptest.sln`.
+2. Use VS2019/VS2022 to open `cryptest.sln`.
 3. For `Debug` `x64` configuration, open `Properties` of `cryptlib` project. In `C/C++` `Code Generation`, set `Runtime Library` to `Multithreading Debug DLL (/MDd)`.
 4. For `Release` `x64` configuration, open `Properties` of `cryptlib` project. In `C/C++` `Code Generation`, set `Runtime Library` to `Multithreading DLL (/MD)`.
 5. `Batch Build` `Debug` AND `Release` `x64` of `cryptlib`.
 
 
-### [PostgreSQL 14.0](https://www.postgresql.org/)
+### [PostgreSQL](https://www.postgresql.org/)
 
 *The database may not be installed locally. You should be able to connect to it.*
 
-1. Use this [link](https://get.enterprisedb.com/postgresql/postgresql-14.0-1-windows-x64-binaries.zip) to download the binaries.
+1. Use this [link](https://www.enterprisedb.com/download-postgresql-binaries) to download the binaries.
 2. Unzip the zip archive here. It should be named `pgsql` and contains `bin`, `include` and `lib`.
 
 
@@ -47,9 +47,9 @@ b2
    - `Browse Source...` and `Browse Build...` to the root directory of `libpqxx`.
    - `Add Entry`: `PostgreSQL_INCLUDE_DIR` (`PATH`) = `../../pgsql/include`
    - `Add Entry`: `PostgreSQL_LIBRARY` (`FILEPATH`) = `../../pgsql/lib/libpq`
-   - `Configure`: Use default settings (`VS2019` `x64`).
+   - `Configure`: Use default settings (`VS2019`/`VS2022` `x64`).
    - `Generate`
-3. Use VS2019 to open `libpqxx.sln`.
+3. Use VS2019/VS2022 to open `libpqxx.sln`.
 4. `Batch Build` `Debug` AND `Release` `x64` of `pqxx`.
 
 
@@ -62,6 +62,6 @@ b2
 
 > Now we should go back to the root directory.
 
-Use VS2019 to open `WebApp.sln`, which is a sample project. Remember to properly configure the database and `config.json` before you `Run` the project.
+Use VS2019/VS2022 to open `WebApp.sln`, which is a sample project. Remember to properly configure the database and `config.json` before you `Run` the project.
 
 > `bserv` and `WebApp` should be built in `Debug` or `Release` (`x64`), NOT (`Win32`/`x86`).

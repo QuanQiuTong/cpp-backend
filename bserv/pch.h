@@ -10,6 +10,6 @@
 // 添加要在此处预编译的标头
 #include "framework.h"
 
-#define _WIN32_WINNT 0x0601
+#define _WIN32_WINNT 0x0602
 
 #endif //PCH_H
