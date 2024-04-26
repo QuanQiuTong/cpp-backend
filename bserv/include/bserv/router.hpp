@@ -218,7 +218,7 @@ namespace bserv {
 							body[k] = a;
 						}
 					}
-			};
+				};
 			if (!resources.request.body().empty()) {
 				auto& content_type = resources.request[http::field::content_type];
 				/*
@@ -306,16 +306,16 @@ namespace bserv {
 
 		template <int Idx, typename Ret, typename ...Args,
 			typename ...Params, typename Head, typename ...Tail>
-			struct path_handler<Idx, Ret(*)(Args ...),
+		struct path_handler<Idx, Ret(*)(Args ...),
 			parameter_pack<Params...>, Head, Tail...>
 			: path_handler<Idx + 1, Ret(*)(Args ...),
 			parameter_pack<Params...>, Tail...> {
 			template <
 				typename Head2, typename ...Tail2,
 				std::enable_if_t<sizeof...(Tail2) == sizeof...(Tail), int> = 0>
-				Ret invoke2(request_resources& resources,
-					Ret(*pf)(Args ...), parameter_pack<Params...>& params,
-					Head2&& head2, Tail2&& ...tail2) {
+			Ret invoke2(request_resources& resources,
+				Ret(*pf)(Args ...), parameter_pack<Params...>& params,
+				Head2&& head2, Tail2&& ...tail2) {
 				// suppress msvc warning
 				boost::ignore_unused(params);
 				if constexpr (Idx == 0)
@@ -422,6 +422,7 @@ namespace bserv {
 	public:
 		router(const std::initializer_list<path_holder_type>& paths)
 			: paths_{ paths } {}
+		router(std::vector<path_holder_type>&& paths) :paths_ { paths } {}
 		void set_resources(std::shared_ptr<server_resources> resources) {
 			resources_ = resources;
 		}

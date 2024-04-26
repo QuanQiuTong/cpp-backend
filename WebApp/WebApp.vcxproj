@@ -153,6 +153,7 @@
   <ItemGroup>
     <ClInclude Include="handlers.h" />
     <ClInclude Include="rendering.h" />
+    <ClInclude Include="router.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
