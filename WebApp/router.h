@@ -42,7 +42,11 @@ public:
 		static RouterBuilder instance; // Guaranteed to be destroyed.
 		return instance;               // Instantiated on first use.
 	}
-	
+	static void add(const Router& router) {
+		for (auto&& path : router)
+			getInstance()._router.push_back(path);
+	}
+
 	Router _router;
 
 private:
@@ -53,7 +57,6 @@ private:
 
 void add_router(const Router& router);
 
-Router get_router();
 
 #define INIT_BEGIN   \
 	namespace        \
