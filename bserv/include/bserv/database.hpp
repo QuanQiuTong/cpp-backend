@@ -409,6 +409,14 @@ namespace bserv {
 				fields_[i]->add(row, i, obj);
 			return obj;
 		}
+		boost::json::array convert_to_array(
+			const db_result& result) {
+			boost::json::array results;
+			for (const auto& row : result)
+				results.emplace_back(convert_row(row));
+
+			return results;
+		}
 		std::vector<boost::json::object> convert_to_vector(
 			const db_result& result) {
 			std::vector<boost::json::object> results;

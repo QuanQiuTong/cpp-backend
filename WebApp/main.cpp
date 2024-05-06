@@ -4,15 +4,14 @@
 #include <boost/json.hpp>
 #include "bserv/common.hpp"
 #include "router.h"
+#include "rendering.h"
 
 using namespace bserv;
 static void show_usage(const server_config& config)
 {
 	std::cout << "Usage: " << config.get_name() << " [config.json]\n"
 		<< config.get_name() << " is a C++ HTTP server.\n\n"
-		"Example:\n"
-		<< "  " << config.get_name() << " config.json\n\n"
-		<< std::endl;
+		"Example:\n  " << config.get_name() << " config.json\n" << std::endl;
 }
 static void show_config(const server_config& config)
 {
@@ -51,6 +50,20 @@ int main(int argc, char* argv[])
 				config.set_db_conn_str(config_obj["conn-str"].as_string().c_str());
 			if (config_obj.contains("log-dir"))
 				config.set_log_path(std::string{ config_obj["log-dir"].as_string() });
+			if (!config_obj.contains("template_root"))
+			{
+				std::cerr << "`template_root` must be specified" << std::endl;
+				return EXIT_FAILURE;
+			}
+			else
+				init_rendering(config_obj["template_root"].as_string().c_str());
+			if (!config_obj.contains("static_root"))
+			{
+				std::cerr << "`static_root` must be specified" << std::endl;
+				return EXIT_FAILURE;
+			}
+			else
+				init_static_root(config_obj["static_root"].as_string().c_str());
 		}
 		catch (const std::exception& e)
 		{

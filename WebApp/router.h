@@ -13,10 +13,8 @@
  * #include "router.h"
  * 
  * INIT_BEGIN
- * add_router({
- *     make_path("/hello", GET, hello_handler),
- *     make_path("/json", POST, json_handler),
- * });
+ * RouterBuilder::add_path("/json", POST, json_handler);
+ * // ...
  * INIT_END
  * 
  * boost::json::object json_handler( ... ) { ... }
@@ -29,7 +27,6 @@
 #pragma once
 #include <vector>
 #include <memory>
-#include <string>
 
 #include "bserv/router.hpp"
 
