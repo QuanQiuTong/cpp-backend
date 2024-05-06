@@ -15,9 +15,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="WebApp.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="rendering.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
@@ -25,6 +22,12 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="chart.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="main.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="basic.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

@@ -31,7 +31,7 @@ void show_config(const server_config &config)
 			  << "\nconn-str: " << config.get_db_conn_str() << std::endl;
 }
 
-int main(int argc, char *argv[])
+int main0(int argc, char *argv[])
 {
 	server_config config;
 

@@ -29,6 +29,7 @@
 #pragma once
 #include <vector>
 #include <memory>
+#include <string>
 
 #include "bserv/router.hpp"
 
@@ -47,6 +48,16 @@ public:
 			getInstance()._router.push_back(path);
 	}
 
+	template <typename Ret, typename ...Args, typename ...Params>
+	static void add_path(const std::string& url, Ret(*pf)(Args ...), Params&& ...params) {
+		auto path = std::make_shared<
+			bserv::router_internal::path<Ret(*)(Args ...),
+			bserv::router_internal::parameter_pack<Params...>>
+			>(url, pf, static_cast<Params&&>(params)...);
+
+		getInstance()._router.push_back(path);
+	}
+
 	Router _router;
 
 private:
@@ -54,9 +65,6 @@ private:
 	RouterBuilder(RouterBuilder const &) = delete;	// Delete copy constructor
 	void operator=(RouterBuilder const &) = delete; // Delete assignment operator
 };
-
-void add_router(const Router& router);
-
 
 #define INIT_BEGIN   \
 	namespace        \
