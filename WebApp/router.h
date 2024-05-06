@@ -51,14 +51,9 @@ private:
 	void operator=(RouterBuilder const &) = delete; // Delete assignment operator
 };
 
-void add_router(const Router &router)
-{
-	auto &builder = RouterBuilder::getInstance();
-	for (auto &path : router)
-		builder._router.push_back(path);
-}
+void add_router(const Router& router);
 
-Router get_router() { return RouterBuilder::getInstance()._router; }
+Router get_router();
 
 #define INIT_BEGIN   \
 	namespace        \

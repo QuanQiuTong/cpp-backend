@@ -1,3 +1,5 @@
+#define BOOST_USE_WINAPI_VERSION BOOST_WINAPI_VERSION_WIN8
+
 #include "router.h"
 
 void add_router(const Router& router)
