@@ -24,6 +24,12 @@
     <ClCompile Include="handlers.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="chart.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="router.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="handlers.h">
