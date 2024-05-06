@@ -85,10 +85,14 @@ int main(int argc, char *argv[])
 		make_path("/hello", &hello,
 				  placeholders::response,
 				  placeholders::session),
+
+				  // GET request
 		make_path("/register", &user_register,
 				  placeholders::request,
 				  placeholders::json_params,
 				  placeholders::db_connection_ptr),
+
+				  // POST request. Just ignore "session".
 		make_path("/login", &user_login,
 				  placeholders::request,
 				  placeholders::json_params,

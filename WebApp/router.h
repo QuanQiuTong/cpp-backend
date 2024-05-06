@@ -40,12 +40,13 @@ public:
 	static RouterBuilder &getInstance()
 	{
 		static RouterBuilder instance; // Guaranteed to be destroyed.
-		return instance;			   // Instantiated on first use.
+		return instance;               // Instantiated on first use.
 	}
+	
 	Router _router;
 
 private:
-	RouterBuilder() {}								// Private constructor
+	RouterBuilder() {}                              // Private constructor
 	RouterBuilder(RouterBuilder const &) = delete;	// Delete copy constructor
 	void operator=(RouterBuilder const &) = delete; // Delete assignment operator
 };
