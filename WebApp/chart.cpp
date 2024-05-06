@@ -20,5 +20,5 @@ object f(request_type& request, object&& params, std::shared_ptr<db_connection> 
 }
 
 INIT_BEGIN
-	add_router({make_path("/chart", &f, placeholders::request, placeholders::json_params, placeholders::db_connection_ptr)});
+    RouterBuilder::add({make_path("/chart", &f, placeholders::request, placeholders::json_params, placeholders::db_connection_ptr)});
 INIT_END

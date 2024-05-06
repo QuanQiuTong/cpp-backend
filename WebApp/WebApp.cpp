@@ -80,7 +80,7 @@ int main(int argc, char *argv[])
 	}
 	show_config(config);
 
-	add_router({
+	RouterBuilder::add({
 		// rest api example
 		make_path("/hello", &hello,
 				  placeholders::response,
@@ -146,8 +146,8 @@ int main(int argc, char *argv[])
 				  placeholders::session),
 	});
 
-	auto _ = server{config, get_router(), {// websocket example
-										   make_path("/echo", &ws_echo, placeholders::session, placeholders::websocket_server_ptr)}};
+	auto _ = server{config, std::move(RouterBuilder::getInstance()._router),
+										   {/*websocket example*/make_path("/echo", &ws_echo, placeholders::session, placeholders::websocket_server_ptr)}};
 
 	return EXIT_SUCCESS;
 }
