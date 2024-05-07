@@ -14,7 +14,7 @@
     problem_id int not null,
     user_id int not null,
 
-    judgement VARCHAR not null,
+    judgement VARCHAR(255) not null,
     reason text not null,
 
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

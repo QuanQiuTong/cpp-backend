@@ -4,7 +4,6 @@
 #include <boost/json.hpp>
 #include "bserv/common.hpp"
 #include "router.hpp"
-#include "rendering.h"
 
 using namespace bserv;
 

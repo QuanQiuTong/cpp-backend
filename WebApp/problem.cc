@@ -12,17 +12,28 @@ using namespace bserv;
 using boost::json::object;
 using dbptr = std::shared_ptr<db_connection>;
 
-static object f(request_type &request, object &&params, dbptr conn)
+
+#include <boost/algorithm/string.hpp>
+
+static auto filtered_field(const object& o, const char* key)
 {
-	if (request.method() != boost::beast::http::verb::post)
-	{
-		throw url_not_found_exception{};
-	}
-	return {
-		{"params", params},
-		{"status", "ok"},
-		{"message", "chart"}};
+	std::string field = o.at(key).as_string().c_str();
+	boost::algorithm::replace_all(field, "'", "''");
+	return field;
 }
+
+static __int64 get_int(const boost::json::object& obj, const std::string& key)
+{
+	auto field = obj.at(key);
+	if (field.is_int64())
+		return field.as_int64();
+	else if (field.is_string())
+		return std::atoll(field.as_string().c_str());
+	else
+		throw std::runtime_error("invalid type for " + key);
+}
+
+
 /*create table problems(
 	id SERIAL primary key,
 
@@ -74,14 +85,30 @@ static object get_problem(dbptr conn, const std::string& id)
 	return orm_problem.convert_row(r.front());
 }
 
-#include <boost/algorithm/string.hpp>
-
-static auto filtered_field(const object &o, const char *key)
+static object set_problem(request_type& req, object&& params, dbptr conn)
 {
-	std::string field = o.at(key).as_string().c_str();
-	boost::algorithm::replace_all(field, "'", "''");
-	return field;
-}
+	if (req.method() != boost::beast::http::verb::post)
+		throw url_not_found_exception{};
+
+	auto id = get_int(params, "id");
+	auto category = filtered_field(params, "category");
+	auto personality = filtered_field(params, "personality");
+	auto history = filtered_field(params, "history");
+	auto problem = filtered_field(params, "problem");
+	auto solution1 = filtered_field(params, "solution1");
+	auto solution2 = filtered_field(params, "solution2");
+
+	db_transaction tx{ conn };
+	db_result r = tx.exec(
+		"update problems set category = ?, personality = ?, history = ?, problem = ?, solution1 = ?, solution2 = ? where id = ?",
+		category, personality, history, problem, solution1, solution2, id);
+	lginfo << r.query();
+	tx.commit();
+
+	return {
+		{"code", 0},
+		{"message", "update success"} };
+}	
 
 static object add_problem(request_type &req, object &&params, dbptr conn)
 {
@@ -108,8 +135,8 @@ static object add_problem(request_type &req, object &&params, dbptr conn)
 		{"message", "insert success"}};
 }
 
-constexpr int PAGE_SIZE = 10;
-constexpr const char PAGE_SIZE_STR[] = "10";
+// constexpr int PAGE_SIZE = 10;
+// constexpr const char PAGE_SIZE_STR[] = "10";
 // static boost::json::array get_problems_gpt(dbptr conn, const std::string &page_num)
 // {
 // 	int page_id = std::stoi(page_num);
@@ -136,12 +163,13 @@ constexpr const char PAGE_SIZE_STR[] = "10";
 // }
 
 INIT_BEGIN
-RouterBuilder::add_path("/chart", &f, placeholders::request, placeholders::json_params, placeholders::db_connection_ptr);
-RouterBuilder::add_path("/count-problems", &count_problems, placeholders::db_connection_ptr);
-RouterBuilder::add_path("/problems", &get_problems, placeholders::db_connection_ptr);
-RouterBuilder::add_path("/problem", &get_problem, placeholders::db_connection_ptr, std::string{"1"});
-RouterBuilder::add_path("/problem/<int>", &get_problem, placeholders::db_connection_ptr, placeholders::_1);
-RouterBuilder::add_path("/add-problem", &add_problem, placeholders::request, placeholders::json_params, placeholders::db_connection_ptr);
-// RouterBuilder::add_path("/page-problems", &get_problems_gpt, placeholders::db_connection_ptr, std::string{"1"});
-// RouterBuilder::add_path("/page-problems/<int>", &get_problems_gpt, placeholders::db_connection_ptr, placeholders::_1);
+using namespace bserv::placeholders;
+RouterBuilder::add_path("/count-problems", &count_problems, db_connection_ptr);
+RouterBuilder::add_path("/problems", &get_problems, db_connection_ptr);
+RouterBuilder::add_path("/problem", &get_problem, db_connection_ptr, std::string{"1"});
+RouterBuilder::add_path("/problem/<int>", &get_problem, db_connection_ptr, _1);
+RouterBuilder::add_path("/set-problem", &set_problem, request, json_params, db_connection_ptr);
+RouterBuilder::add_path("/add-problem", &add_problem, request, json_params, db_connection_ptr);
+// RouterBuilder::add_path("/page-problems", &get_problems_gpt, db_connection_ptr, std::string{"1"});
+// RouterBuilder::add_path("/page-problems/<int>", &get_problems_gpt, db_connection_ptr, _1);
 INIT_END

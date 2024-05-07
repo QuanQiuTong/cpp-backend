@@ -13,7 +13,6 @@ using namespace bserv;
 using object = boost::json::object;
 
 
-
 /*CREATE TABLE users(
 	id SERIAL PRIMARY KEY,
 
@@ -37,6 +36,8 @@ std::optional<object> get_user(db_transaction& tx, const boost::json::string& us
 
 object signup(request_type &request, object &&params, std::shared_ptr<db_connection> conn)
 {
+	if (request.method() != boost::beast::http::verb::post)
+		throw url_not_found_exception{};
 	auto username = params.at("username").as_string();
 	auto password = params.at("password").as_string();
 	auto email = params.at("email").as_string();
@@ -69,9 +70,7 @@ object signin(request_type &request, object &&params, std::shared_ptr<db_connect
 		return {
 			{"success", false},
 			{"message", "wrong password"}};
-	return {
-		{"success", true},
-		{"user", user} };
+	return user;
 }
 
 boost::json::array user_list(std::shared_ptr<db_connection> conn)
