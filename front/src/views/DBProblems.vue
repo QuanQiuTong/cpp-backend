@@ -1,16 +1,14 @@
-<script setup>
-import DBProfile from "@/components/DBProfile.vue";
+<script setup lang="ts">
 import MyNavBar from "@/components/MyNavBar.vue";
 import SoftButton from "@/components/SoftButton.vue";
 import Markdown from "@/components/Markdown.vue";
 
-import { onMounted, onBeforeUnmount, ref} from "vue";
+import { onMounted, ref } from "vue";
 import { useStore } from "vuex";
 
-const store = useStore();
-const body = document.getElementsByTagName("body")[0];
-
 onMounted(() => {
+  const store = useStore();
+  const body = document.getElementsByTagName("body")[0];
   // 取消侧边栏和上下
   store.commit("noWrappers");
   body.classList.remove("bg-gray-100");
@@ -19,106 +17,176 @@ onMounted(() => {
   getProblem(1);
 });
 
-const showProfile = ref(false);
-const viewProfile = () => {
-  showProfile.value = true;
-};
+
 
 const count = ref(10);
+const pid = ref(0); // 数据库中的id
+const category = ref("default");
 const problem = ref("loading...");
 const solution1 = ref("loading...");
 const solution2 = ref("loading...");
 
 import axios from "axios";
-const getProblemCount = () => {
-  axios.get('api/count-problems', { headers: { Authorization: localStorage.token } })
+const getProblemCount = () =>
+  axios.get('api/count-problems')
     .then(res => {
       console.log(res.data);
       count.value = res.data.count;
-    })
-    .catch(err => {
-      console.log(err);
-      
-    });
-};
-const getProblem = (id) => {
-  console.log("getProblem", id);
-  axios.get('api/problem/' + (id-1), { headers: { Authorization: localStorage.token } })
+    }).catch(err => { console.log(err); });
+
+const getProblem = (id) =>
+  axios.get('api/problem/' + (id - 1))
     .then(res => {
       console.log(res.data);
+      category.value = res.data.category;
       problem.value = res.data.problem;
       solution1.value = res.data.solution1;
       solution2.value = res.data.solution2;
-    })
-    .catch(err => {
-      console.log(err);
-      
-    });
-};
+    }).catch(err => { console.log(err); });
+
+const setProblem = () =>
+  axios.post('api/set-problem', {
+    id: pid.value,
+    category: category.value,
+    problem: problem.value,
+    solution1: solution1.value,
+    solution2: solution2.value
+  }).then(res => { console.log(res.data); })
+    .catch(err => { console.log(err); });
+const annotation =
+  (pid: number, uid: number, judge: string, reason: string) =>
+    axios.post('/api/annotation', {
+      problem_id: pid,
+      user_id: uid,
+      judgement: judge,
+      reason: reason
+    }).then(res => console.log(res.data))
+      .catch(err => console.log(err))
+
+
+
+const currentPage = ref(1);
 const handleCurrentChange = (val) => {
+  currentPage.value = val;
   getProblem(val);
 };
+const check1 = () => {
+  if (!localStorage.user_id)
+    return alert("Please login first");
+  annotation(pid.value, localStorage.user_id, "1", "");
+}
+const check2 = () => {
+  if (!localStorage.user_id)
+    return alert("Please login first");
+  annotation(pid.value, localStorage.user_id, "2", "");
+}
+
+const manage = ref(false);
 
 </script>
 
 <template>
   <div class="container top-0 position-sticky z-index-sticky">
     <div class="row">
-      <MyNavBar
-        is-blur="blur blur-rounded my-3 py-2 start-0 end-0 mx-4 shadow"
-        btn-background="bg-gradient-success"
-        :dark-mode="true"
-      />
+      <MyNavBar is-blur="blur blur-rounded my-3 py-2 start-0 end-0 mx-4 shadow" btn-background="bg-gradient-success"
+        :dark-mode="true" />
     </div>
   </div>
 
-  <el-drawer
-    v-model="showProfile"
-    title="Profile"
-    size="36%"
-    :with-header="false"
-  >
-    <DBProfile />
-  </el-drawer>
+  <div class="manage">
+    <el-switch v-model="manage" active-text="Manage" active-color="#13ce66" inactive-color="#ff4949" />
+  </div>
 
-
-  <div class="mb-7" />
-  <!-- <span class="col-4">
-    <SoftButton
-      @click="viewProfile"
-      class="btn btn-primary btn-sm"
-      text="Profile"/>
-  </span> -->
-
-
-  <div class="row" :style="{marginLeft:'1rem', marginRight:'1rem'}">
+  <div class="row margin-lr" v-show="!manage">
     <div class="col-12 col-lg-4">
-        <el-card>
-            <Markdown :source="problem" />
-        </el-card>
-    </div>
-    <div class="col-12 col-lg-4">
-        <el-card>
-            <Markdown :source="solution1" />
-        </el-card>
-        <SoftButton @click="check1"> </SoftButton>
+      <el-card>
+        <Markdown :source="problem" />
+      </el-card>
+      <span class="bottom-bar"> Category: {{ category }} </span>
     </div>
     <div class="col-12 col-lg-4">
       <el-card>
-          <Markdown :source="solution2" />
+        <Markdown :source="solution1" />
       </el-card>
+      <span class="bottom-bar">
+        <SoftButton class="bottom-bar" @click="check1"> Check 1 </SoftButton>
+      </span>
+    </div>
+    <div class="col-12 col-lg-4">
+      <el-card>
+        <Markdown :source="solution2" />
+      </el-card>
+      <span class="bottom-bar">
+        <SoftButton class="bottom-bar" @click="check2"> Check 2 </SoftButton>
+      </span>
     </div>
   </div>
-  <div class="row" :style="{marginLeft:'1rem', marginRight:'1rem'}">
-  <el-pagination :current-page="1" @update:current-page="handleCurrentChange" :total="count" :default-page-size="1" />
+
+  <div class="row margin-lr" v-show="manage">
+    <div class="col-12 col-lg-4">
+      <input v-model="problem" class="form-control long" />
+      <span class="bottom-bar">
+        <input class="form-control" v-model="category" placeholder="Category"/>
+      </span>
+    </div>
+    <div class="col-12 col-lg-4">
+      <input v-model="solution1" class="form-control long" />
+    </div>
+    <div class="col-12 col-lg-4">
+      <input v-model="solution2" class="form-control long" />
+    </div>
+  </div>
+
+  <div class="row margin-lr">
+    <el-pagination :current-page="currentPage" @update:current-page="handleCurrentChange" :total="count"
+      :default-page-size="1" :style="{marginTop: '0.5rem'}"/>
   </div>
 </template>
 
 <style scoped>
+.margin-lr {
+  margin-left: 1rem;
+  margin-right: 1rem;
+}
+
+.manage {
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-start;
+  margin-top: 1.8rem;
+  margin-left: 1rem;
+  margin-bottom: 1.6rem;
+}
+
 .el-card {
-  /* margin-bottom: 1rem; */
+  margin-top: 0rem;
+  margin-bottom: 0.5rem;
   white-space: pre-wrap;
-  max-height: 80vh;
+  max-height: 78vh;
   overflow-y: auto;
 }
+
+.bottom-bar {
+  height: 2rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.long {
+  width: 100%;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 8px;
+  box-sizing: border-box;
+  min-height: 10rem; /* 设置最小高度 */
+  box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.2); /* 增加阴影范围 */
+}
+
+.bottom-bar input.form-control {
+  height: 2rem;
+  margin-top: 1rem;
+}
+
 </style>
