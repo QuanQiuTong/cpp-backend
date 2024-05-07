@@ -6,9 +6,8 @@
 #include <string>
 
 #include "bserv/common.hpp"
-#include "router.h"
+#include "router.hpp"
 
-using std::string;
 using namespace bserv;
 using boost::json::object;
 using dbptr = std::shared_ptr<db_connection>;
@@ -41,13 +40,13 @@ select * from problems;
 */
 db_relation_to_object orm_problem{
 	make_db_field<int>("id"),
-	make_db_field<string>("category"),
-	make_db_field<string>("personality"),
-	make_db_field<string>("history"),
-	make_db_field<string>("problem"),
-	make_db_field<string>("solution1"),
-	make_db_field<string>("solution2"),
-	make_db_field<string>("created_at")};
+	make_db_field<std::string>("category"),
+	make_db_field<std::string>("personality"),
+	make_db_field<std::string>("history"),
+	make_db_field<std::string>("problem"),
+	make_db_field<std::string>("solution1"),
+	make_db_field<std::string>("solution2"),
+	make_db_field<std::string>("created_at")};
 
 static boost::json::array get_problems(dbptr conn)
 {
@@ -57,13 +56,11 @@ static boost::json::array get_problems(dbptr conn)
 	return orm_problem.convert_to_array(r);
 }
 
-#include <iostream>
-using std::cout, std::endl;
 #include <boost/algorithm/string.hpp>
 
 static auto filtered_field(const object &o, const char *key)
 {
-	boost::json::string field = o.at(key).as_string();
+	std::string field = o.at(key).as_string().c_str();
 	boost::algorithm::replace_all(field, "'", "''");
 	return field;
 }
@@ -73,22 +70,13 @@ static object add_problem(request_type &req, object &&params, dbptr conn)
 	if (req.method() != boost::beast::http::verb::post)
 		throw url_not_found_exception{};
 
-	boost::json::string category = filtered_field(params, "category");
-	boost::json::string personality = filtered_field(params, "personality");
-	boost::json::string history = filtered_field(params, "history");
-	boost::json::string problem = filtered_field(params, "problem");
-	boost::json::string solution1 = filtered_field(params, "solution1");
-	boost::json::string solution2 = filtered_field(params, "solution2");
+		auto category = filtered_field(params, "category");
+		auto personality = filtered_field(params, "personality");
+		auto history = filtered_field(params, "history");
+		auto problem = filtered_field(params, "problem");
+		auto solution1 = filtered_field(params, "solution1");
+		auto solution2 = filtered_field(params, "solution2");
 
-	cout << "category: " << category << endl;
-	cout << "personality: " << personality << endl;
-	cout << "history: " << history << endl;
-	cout << "problem: " << problem << endl;
-	cout << "solution1: " << solution1 << endl;
-	cout << "solution2: " << solution2 << endl;
-
-	try // if params.at throws an exception, it will not be caught, and the server will return a 500 error
-	{
 		db_transaction tx{conn};
 		db_result r = tx.exec(
 			"insert into problems (category, personality, history, problem, solution1, solution2) "
@@ -96,14 +84,7 @@ static object add_problem(request_type &req, object &&params, dbptr conn)
 			category, personality, history, problem, solution1, solution2);
 		lginfo << r.query();
 		tx.commit();
-	}
-	catch (...)
-	{
-		return {
-			{"code", 1},
-			{"message", "insert failed"}};
-	}
-	cout << "insert finished" << endl;
+
 	return {
 		{"code", 0},
 		{"message", "insert success"}};

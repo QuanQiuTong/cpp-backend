@@ -7,7 +7,7 @@
  * @copyright Copyright (c) 2024
  *
  *
- * The singleton class RouterBuilder is used to build the router simply--just like the snippet below:
+ * The singleton class RouterBuilder is used to build the router simply --just like the snippet below:
  * 
  * ```cpp
  * #include "router.h"

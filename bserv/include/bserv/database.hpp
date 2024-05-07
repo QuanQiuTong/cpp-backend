@@ -24,48 +24,11 @@ namespace bserv {
 	using raw_db_connection_type = pqxx::connection;
 	using raw_db_transaction_type = pqxx::work;
 
-	class db_field {
-	private:
-		pqxx::field field_;
-	public:
-		db_field(const pqxx::field& field) : field_{ field } {}
-		const char* c_str() const { return field_.c_str(); }
-		template <typename Type>
-		Type as() const { return field_.as<Type>(); }
-		bool is_null() const { return field_.is_null(); }
-	};
+	using db_field = pqxx::field; // 'using' instead of packaging.
 
-	class db_row {
-	private:
-		pqxx::row row_;
-	public:
-		db_row(const pqxx::row& row) : row_{ row } {}
-		std::size_t size() const { return row_.size(); }
-		db_field operator[](std::size_t idx) const { return row_[(pqxx::row::size_type)idx]; }
-	};
+	using db_row = pqxx::row; // 'using' instead of packaging.
 
-	class db_result {
-	private:
-		pqxx::result result_;
-	public:
-		class const_iterator {
-		private:
-			pqxx::result::const_iterator iterator_;
-		public:
-			const_iterator(
-				const pqxx::result::const_iterator& iterator
-			) : iterator_{ iterator } {}
-			const_iterator& operator++() { ++iterator_; return *this; }
-			bool operator==(const const_iterator& rhs) const { return iterator_ == rhs.iterator_; }
-			bool operator!=(const const_iterator& rhs) const { return iterator_ != rhs.iterator_; }
-			db_row operator*() const { return *iterator_; }
-		};
-		db_result() = default;
-		db_result(const pqxx::result& result) : result_{ result } {}
-		const_iterator begin() const { return result_.begin(); }
-		const_iterator end() const { return result_.end(); }
-		std::string query() const { return result_.query(); }
-	};
+	using db_result = pqxx::result; // 'using' instead of packaging.
 
 	class db_connection_manager;
 

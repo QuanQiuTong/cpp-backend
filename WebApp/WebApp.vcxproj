@@ -147,16 +147,13 @@
     <PostBuildEvent />
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="chart.cpp" />
-    <ClCompile Include="handlers.cpp" />
-    <ClCompile Include="rendering.cpp" />
+    <ClCompile Include="annotation.cc" />
+    <ClCompile Include="problem.cc" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="basic.cpp" />
+    <ClCompile Include="user.cc" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="handlers.h" />
-    <ClInclude Include="rendering.h" />
-    <ClInclude Include="router.h" />
+    <ClInclude Include="router.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

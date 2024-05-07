@@ -15,30 +15,21 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="rendering.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="handlers.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="chart.cpp">
+    <ClCompile Include="problem.cc">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="main.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="basic.cpp">
+    <ClCompile Include="annotation.cc">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="user.cc">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="handlers.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="rendering.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="router.h">
+    <ClInclude Include="router.hpp">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
