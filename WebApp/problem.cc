@@ -46,7 +46,8 @@ db_relation_to_object orm_problem{
 	make_db_field<std::string>("problem"),
 	make_db_field<std::string>("solution1"),
 	make_db_field<std::string>("solution2"),
-	make_db_field<std::string>("created_at")};
+	// make_db_field<std::string>("created_at")
+};
 
 static boost::json::array get_problems(dbptr conn)
 {
@@ -54,6 +55,23 @@ static boost::json::array get_problems(dbptr conn)
 	db_result r = tx.exec("select * from problems");
 	lginfo << r.query();
 	return orm_problem.convert_to_array(r);
+}
+
+static object count_problems(dbptr conn) {
+	db_transaction tx{ conn };
+	db_result r = tx.exec("select count(*) from problems");
+	return { { "count",r.front()[0].as<size_t>()} };
+}
+
+static object get_problem(dbptr conn, const std::string& id)
+{
+	db_transaction tx{ conn };
+	db_result r = tx.exec("select * from problems limit 1 offset ?;", std::stoi(id));
+	tx.commit();
+	lginfo << r.query();
+	if (r.empty())
+		throw url_not_found_exception{};
+	return orm_problem.convert_row(r.front());
 }
 
 #include <boost/algorithm/string.hpp>
@@ -119,7 +137,10 @@ constexpr const char PAGE_SIZE_STR[] = "10";
 
 INIT_BEGIN
 RouterBuilder::add_path("/chart", &f, placeholders::request, placeholders::json_params, placeholders::db_connection_ptr);
+RouterBuilder::add_path("/count-problems", &count_problems, placeholders::db_connection_ptr);
 RouterBuilder::add_path("/problems", &get_problems, placeholders::db_connection_ptr);
+RouterBuilder::add_path("/problem", &get_problem, placeholders::db_connection_ptr, std::string{"1"});
+RouterBuilder::add_path("/problem/<int>", &get_problem, placeholders::db_connection_ptr, placeholders::_1);
 RouterBuilder::add_path("/add-problem", &add_problem, placeholders::request, placeholders::json_params, placeholders::db_connection_ptr);
 // RouterBuilder::add_path("/page-problems", &get_problems_gpt, placeholders::db_connection_ptr, std::string{"1"});
 // RouterBuilder::add_path("/page-problems/<int>", &get_problems_gpt, placeholders::db_connection_ptr, placeholders::_1);

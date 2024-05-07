@@ -26,7 +26,14 @@ namespace bserv {
 
 	using db_field = pqxx::field; // 'using' instead of packaging.
 
-	using db_row = pqxx::row; // 'using' instead of packaging.
+	class db_row {
+	private:
+		pqxx::row row_;
+	public:
+		db_row(const pqxx::row& row) : row_{ row } {}
+		std::size_t size() const { return row_.size(); }
+		db_field operator[](std::size_t idx) const { return row_[(pqxx::row::size_type)idx]; }
+	};
 
 	using db_result = pqxx::result; // 'using' instead of packaging.
 

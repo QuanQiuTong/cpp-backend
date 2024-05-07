@@ -52,7 +52,6 @@ object signup(request_type &request, object &&params, std::shared_ptr<db_connect
 
 object signin(request_type &request, object &&params, std::shared_ptr<db_connection> conn)
 {
-
 	auto username = params.at("username").as_string();
 	auto password = params.at("password").as_string();
 
@@ -70,6 +69,9 @@ object signin(request_type &request, object &&params, std::shared_ptr<db_connect
 		return {
 			{"success", false},
 			{"message", "wrong password"}};
+	return {
+		{"success", true},
+		{"user", user} };
 }
 
 boost::json::array user_list(std::shared_ptr<db_connection> conn)
