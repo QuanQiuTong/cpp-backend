@@ -28,8 +28,8 @@ static object f(request_type &request, object &&params, dbptr conn)
 	id SERIAL primary key,
 
 	category varchar(255) not null,
-	personality TEXT,
-	history TEXT,
+	personality TEXT not null,
+	history TEXT not null,
 	problem TEXT not null,
 	solution1 TEXT not null,
 	solution2 TEXT not null
@@ -61,33 +61,41 @@ static boost::json::array get_problems(dbptr conn)
 using std::cout, std::endl;
 #include <boost/algorithm/string.hpp>
 
+static auto filtered_field(const object &o, const char *key)
+{
+	boost::json::string field = o.at(key).as_string();
+	boost::algorithm::replace_all(field, "'", "''");
+	return field;
+}
+
 static object add_problem(request_type &req, object &&params, dbptr conn)
 {
 	if (req.method() != boost::beast::http::verb::post)
 		throw url_not_found_exception{};
 
-	db_transaction tx{conn};
+	boost::json::string category = filtered_field(params, "category");
+	boost::json::string personality = filtered_field(params, "personality");
+	boost::json::string history = filtered_field(params, "history");
+	boost::json::string problem = filtered_field(params, "problem");
+	boost::json::string solution1 = filtered_field(params, "solution1");
+	boost::json::string solution2 = filtered_field(params, "solution2");
 
-	std::string category = params.at("category").as_string().c_str();
-	std::string personality = params.at("personality").as_string().c_str();
-	std::string history = params.at("history").as_string().c_str();
-	std::string problem = params.at("problem").as_string().c_str();
-	std::string solution1 = params.at("solution1").as_string().c_str();
-	std::string solution2 = params.at("solution2").as_string().c_str();
-
-	boost::algorithm::replace_all(category, "'", "''");
-	boost::algorithm::replace_all(personality, "'", "''");
-	boost::algorithm::replace_all(history, "'", "''");
-	boost::algorithm::replace_all(problem, "'", "''");
-	boost::algorithm::replace_all(solution1, "'", "''");
-	boost::algorithm::replace_all(solution2, "'", "''");
+	cout << "category: " << category << endl;
+	cout << "personality: " << personality << endl;
+	cout << "history: " << history << endl;
+	cout << "problem: " << problem << endl;
+	cout << "solution1: " << solution1 << endl;
+	cout << "solution2: " << solution2 << endl;
 
 	try // if params.at throws an exception, it will not be caught, and the server will return a 500 error
 	{
+		db_transaction tx{conn};
 		db_result r = tx.exec(
-			"insert into problems (category, personality, history, problem, solution1, solution2) values (?,?,?,?,?,?)",
+			"insert into problems (category, personality, history, problem, solution1, solution2) "
+			"values (?, ?, ?, ?, ?, ?)",
 			category, personality, history, problem, solution1, solution2);
 		lginfo << r.query();
+		tx.commit();
 	}
 	catch (...)
 	{
@@ -95,6 +103,7 @@ static object add_problem(request_type &req, object &&params, dbptr conn)
 			{"code", 1},
 			{"message", "insert failed"}};
 	}
+	cout << "insert finished" << endl;
 	return {
 		{"code", 0},
 		{"message", "insert success"}};
