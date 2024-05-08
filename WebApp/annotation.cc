@@ -72,9 +72,45 @@ boost::json::object del_annotation(
   };
 }
 
+bserv::json::object count_annotations(
+  std::shared_ptr<bserv::db_connection> conn)
+{
+	bserv::db_transaction tx{conn};
+	auto res = tx.exec("select count(*) from annotation");
+	return { {"count", res.front()[0].as<size_t>()}};
+}
+
+bserv::db_relation_to_object orm_annotation{
+    bserv::make_db_field<int>("id"),
+    bserv::make_db_field<int>("problem_id"),
+    bserv::make_db_field<int>("user_id"),
+    bserv::make_db_field<std::string>("judgement"),
+    bserv::make_db_field<std::string>("reason"),
+    bserv::make_db_field<std::string>("created_at")
+};
+
+boost::json::array annotations(
+  bserv::request_type& request,
+  boost::json::object&& params,
+  std::shared_ptr<bserv::db_connection> conn,
+  std::string page_id)
+{
+	if (request.method() != boost::beast::http::verb::get)
+	throw bserv::url_not_found_exception{};
+  
+    auto id = std::stoll(page_id);
+
+	bserv::db_transaction tx{conn};
+    auto res = tx.exec("select * from annotation order by id desc limit 10 offset ?", (id - 1) * 10);
+
+	return orm_annotation.convert_to_array(res);
+}
 
 INIT_BEGIN
 using namespace bserv::placeholders;
 RouterBuilder::add_path("/annotation", &annotation, request, json_params, db_connection_ptr);
 RouterBuilder::add_path("/del-annotation", &del_annotation, request, json_params, db_connection_ptr);
+RouterBuilder::add_path("/count-annotations", &count_annotations, db_connection_ptr);
+RouterBuilder::add_path("/annotations", &annotations, request, json_params, db_connection_ptr, std::string{"1"});
+RouterBuilder::add_path("/annotations/<int>", &annotations, request, json_params, db_connection_ptr, bserv::placeholders::_1);
 INIT_END

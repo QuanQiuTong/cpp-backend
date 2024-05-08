@@ -62,15 +62,18 @@ const setProblem = () =>
     .catch(err => { console.log(err); });
 
 const annotation =
-  (pid: number, uid: number, judge: string, reason: string) =>
+  (pid: number, judge: string, reason: string) =>{
+    let id = sessionStorage.getItem("user_id");
+    if(!id) id = localStorage.getItem("user_id");
+    if (!id) return alert("Please login first");
     axios.post('/api/annotation', {
       problem_id: pid,
-      user_id: uid,
+      user_id: parseInt(id),
       judgement: judge,
       reason: reason
     }).then(res => console.log(res.data))
-      .catch(err => console.log(err))
-
+      .catch(err => console.log(err));
+}
 
 
 const currentPage = ref(1);
@@ -78,27 +81,27 @@ const handleCurrentChange = (val) => {
   currentPage.value = val;
   getProblem(val);
 };
+
+
+
+const dialogVisible = ref(false);
+const judge = ref("your judgement here");
+const reason = ref("");
 const check1 = () => {
-  let id = sessionStorage.getItem("user_id");
-  if(!id) id = localStorage.getItem("user_id");
-  if (!id)
-    return alert("Please login first");
-  annotation(pid.value, parseInt(id), "1", "");
-  currentPage.value++;
-  getProblem(currentPage.value);
+  dialogVisible.value = true;
+  judge.value = "solution 1 is better";
 }
 const check2 = () => {
-  let id = sessionStorage.getItem("user_id");
-  if(!id) id = localStorage.getItem("user_id");
-  if (!id)
-    return alert("Please login first");
-  annotation(pid.value, parseInt(id), "2", "");
-  currentPage.value++;
-  getProblem(currentPage.value);
+  dialogVisible.value = true;
+  judge.value = "solution 2 is better";
 }
-
-const manage = ref(false);
-
+const handleClose = () => {
+  dialogVisible.value = false;
+  annotation(pid.value, judge.value, reason.value);
+  if(++currentPage.value > count.value)
+    currentPage.value = 1;
+  getProblem(currentPage.value);
+};
 
 getProblemCount();
   getProblem(1);
@@ -112,11 +115,24 @@ getProblemCount();
     </div>
   </div>
 
-  <div class="manage">
-    <el-switch v-model="manage" active-text="Manage" active-color="#13ce66" inactive-color="#ff4949" />
-  </div>
+  <el-dialog
+    v-model="dialogVisible"
+    title="Judgement"
+    width="500"
+    :before-close="handleClose"
+  >
+    <input v-model="judge" class="form-control" placeholder="your judgement here" />
+    <div class="mb-2"/>
+    <textarea v-model="reason" class="form-control long" placeholder="your reason here" />
+    <span class="bottom-bar">
+      <SoftButton :style="{marginTop:'2rem'}" slot="footer" type="primary" @click="handleClose">Submit</SoftButton>
+    </span>
+    <div class="mb-2"/>
+  </el-dialog>
 
-  <div class="row margin-lr" v-show="!manage">
+  <div class="below-nav"/>
+
+  <div class="row margin-lr">
     <div class="col-12 col-lg-4">
       <el-card>
         <Markdown :source="problem" />
@@ -141,25 +157,6 @@ getProblemCount();
     </div>
   </div>
 
-  <div class="row margin-lr" v-show="manage">
-    <div class="col-12 col-lg-4">
-      <textarea v-model="problem" class="form-control long" autosize/>
-      <span class="bottom-bar">
-        <input class="form-control" v-model="category" placeholder="Category" />
-      </span>
-    </div>
-    <div class="col-12 col-lg-4">
-      <textarea v-model="solution1" class="form-control long" autosize/>
-      <span class="bottom-bar">
-        <SoftButton class="bottom-bar
-        " @click="setProblem"> Save </SoftButton>
-      </span>
-    </div>
-    <div class="col-12 col-lg-4">
-      <textarea v-model="solution2" class="form-control long" autosize/>
-    </div>
-  </div>
-
   <div class="row margin-lr">
     <el-pagination :current-page="currentPage" @update:current-page="handleCurrentChange" :total="count"
       :default-page-size="1" :style="{marginTop: '0.5rem'}"/>
@@ -172,13 +169,8 @@ getProblemCount();
   margin-right: 1rem;
 }
 
-.manage {
-  display: flex;
-  justify-content: flex-start;
-  align-items: flex-start;
-  margin-top: 1.8rem;
-  margin-left: 1rem;
-  margin-bottom: 1.6rem;
+.below-nav{
+  margin-bottom: 5.4rem;
 }
 
 .el-card {
@@ -200,14 +192,11 @@ getProblemCount();
 .long {
   width: 100%;
   border: 1px solid #ccc;
-  border-radius: 4px;
   padding: 8px;
-  box-sizing: border-box;
   height: auto;
   min-height: 40vh;
   overflow-y: auto;
   max-height: 78vh;
-  box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.2); /* 增加阴影范围 */
   margin-bottom: 0.5rem;
 }
 

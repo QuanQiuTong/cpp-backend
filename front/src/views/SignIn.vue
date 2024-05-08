@@ -61,7 +61,7 @@
       </div>
     </section>
   </main>
-  <app-footer />
+  <!-- <app-footer /> -->
 </template>
 
 <script setup>

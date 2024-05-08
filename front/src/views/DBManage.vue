@@ -60,16 +60,34 @@ const setProblem = () =>
   }).then(res => { console.log(res.data); })
     .catch(err => { console.log(err); });
 
+const delProblem = () =>{
+  console.log(pid.value);
+  axios.post('api/del-problem',
+   {id: pid.value}
+  ).then(res => {
+    console.log(res.data);
+    getProblemCount();
+    if(currentPage.value > 1)
+      currentPage.value -= 1;
+    getProblem(currentPage.value);
+  })
+    .catch(err => { console.log(err); });}
+
 const newProblem = () =>
   axios.post('api/add-problem', {
-    category: category.value,
+    category: 'basic math',
     personality: "default",
     history: "none",
-    problem: problem.value,
-    solution1: solution1.value,
-    solution2: solution2.value
-  }).then(res => { console.log(res.data); getProblemCount() })
-    .catch(err => { console.log(err); });
+    problem: '1+1=\n\t--' + (new Date()).toLocaleString(),
+    solution1: '1',
+    solution2: '2'
+  }).then(async (res) => {
+    console.log(res.data);
+    await getProblemCount();
+    currentPage.value = count.value;
+    getProblem(currentPage.value);
+  })
+  .catch(err => { console.log(err); });
 
 const currentPage = ref(1);
 const handleCurrentChange = (val) => {
@@ -90,50 +108,52 @@ getProblemCount();
     </div>
   </div>
 
-  <div class="mb-7"/>
+  <div class="below-nav" />
 
 
   <div class="row margin-lr">
     <div class="col-12 col-lg-4">
       <textarea v-model="problem" class="form-control long" autosize/>
+    </div>
+    <div class="col-12 col-lg-4">
+      <textarea v-model="solution1" class="form-control long" autosize/>
+    </div>
+    <div class="col-12 col-lg-4">
+      <textarea v-model="solution2" class="form-control long" autosize/>
+    </div>
+  </div>
+
+  <div class="row margin-lr">
+    <div class="col-4">
       <span class="bottom-bar">
         <input class="form-control" v-model="category" placeholder="Category" />
       </span>
     </div>
-    <div class="col-12 col-lg-4">
-      <textarea v-model="solution1" class="form-control long" autosize/>
-      <span class="bottom-bar">
-        <SoftButton class="bottom-bar
-        " @click="setProblem"> Save </SoftButton>
-      </span>
+    <div class="col-3">
+        <SoftButton class="bottom-bar" @click="setProblem"> Save </SoftButton>
     </div>
-    <div class="col-12 col-lg-4">
-      <textarea v-model="solution2" class="form-control long" autosize/>
-      <span class="bottom-bar">
-        <SoftButton class="bottom-bar
-        " @click="newProblem"> New </SoftButton>
-      </span>
+    <div class="col-3">
+        <SoftButton class="bottom-bar" color="danger" @click="delProblem"> Delete </SoftButton>
+    </div>
+    <div class="col-2">
+        <SoftButton class="bottom-bar" @click="newProblem"> New </SoftButton>
     </div>
   </div>
 
   <div class="row margin-lr">
     <el-pagination :current-page="currentPage" @update:current-page="handleCurrentChange" :total="count"
-      :default-page-size="1" :style="{marginTop: '0.5rem'}"/>
+    :pager-count="21" :default-page-size="1" :style="{marginTop: '0.5rem'}"/>
   </div>
 </template>
 
 <style scoped>
+.below-nav{
+  margin-bottom: 5.4rem;
+}
+
 .margin-lr {
   margin-left: 1rem;
   margin-right: 1rem;
-}
-
-.el-card {
-  margin-top: 0rem;
-  margin-bottom: 0.5rem;
-  white-space: pre-wrap;
-  max-height: 78vh;
-  overflow-y: auto;
 }
 
 .bottom-bar {
@@ -160,7 +180,6 @@ getProblemCount();
 
 .bottom-bar input.form-control {
   height: 2rem;
-  margin-top: 1rem;
 }
 
 </style>

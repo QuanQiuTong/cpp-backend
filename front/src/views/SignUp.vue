@@ -52,7 +52,7 @@
       </div>
     </div>
   </div>
-  <app-footer />
+  <!-- <app-footer /> -->
 </template>
 
 <script setup>

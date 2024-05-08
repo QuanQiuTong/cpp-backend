@@ -79,6 +79,11 @@ const routes = [
     name: "Manage",
     component: () => import("@/views/DBManage.vue"),
   },
+  {
+    path: "/list",
+    name: "List",
+    component: () => import("@/views/DBList.vue"),
+  },
 ];
 
 const router = createRouter({

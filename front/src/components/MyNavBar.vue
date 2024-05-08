@@ -19,17 +19,17 @@
                 <ul class="navbar-nav mx-auto">
                     <li class="nav-item">
                         <router-link class="nav-link d-flex align-items-center me-2 active" aria-current="page"
-                            to="/manage">
+                            to="/list">
                             <i class="fa fa-chart-pie opacity-6 me-1" aria-hidden="true"
                                 :class="isBlur ? 'text-dark' : 'text-white'"></i>
-                            Manage
+                            List
                         </router-link>
                     </li>
                     <li class="nav-item">
-                        <router-link class="nav-link me-2" to="/profile">
+                        <router-link class="nav-link me-2" to="/manage">
                             <i class="fa fa-user opacity-6 me-1" aria-hidden="true"
                                 :class="isBlur ? 'text-dark' : 'text-white'"></i>
-                            Profile
+                            Manage
                         </router-link>
                     </li>
                     <li class="nav-item">

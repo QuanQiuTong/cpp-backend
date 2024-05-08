@@ -22,15 +22,25 @@ static auto filtered_field(const object& o, const char* key)
 	return field;
 }
 
+#include <iostream>
+
 static __int64 get_int(const boost::json::object& obj, const std::string& key)
 {
+	if (!obj.contains(key))
+	{
+		std::cerr << "missing field " << key << std::endl;
+		throw std::runtime_error("missing field " + key);
+	}
 	auto field = obj.at(key);
 	if (field.is_int64())
 		return field.as_int64();
 	else if (field.is_string())
 		return std::atoll(field.as_string().c_str());
 	else
+	{
+		std::cerr << "invalid type for " << key << std::endl;
 		throw std::runtime_error("invalid type for " + key);
+	}
 }
 
 
@@ -135,9 +145,28 @@ static object add_problem(request_type &req, object &&params, dbptr conn)
 		{"message", "insert success"}};
 }
 
+static object del_problem(request_type &req, object &&params, dbptr conn)
+{
+	if (req.method() != boost::beast::http::verb::post)
+		throw url_not_found_exception{};
+
+	std::cout<<"del_problem"<<std::endl;
+	auto id = get_int(params, "id");
+	std::cout<<"id:"<<id<<std::endl;
+
+	db_transaction tx{conn};
+	tx.exec("delete from annotation where problem_id = ?", id); // foreign key
+	tx.exec("delete from problems where id = ?", id);
+	tx.commit();
+
+	return {
+		{"code", 0},
+		{"message", "delete success"}};
+}
+
 // constexpr int PAGE_SIZE = 10;
 // constexpr const char PAGE_SIZE_STR[] = "10";
-// static boost::json::array get_problems_gpt(dbptr conn, const std::string &page_num)
+// static boost::json::array get_problems_page(dbptr conn, const std::string &page_num)
 // {
 // 	int page_id = std::stoi(page_num);
 // 	db_transaction tx{conn};
@@ -170,6 +199,8 @@ RouterBuilder::add_path("/problem", &get_problem, db_connection_ptr, std::string
 RouterBuilder::add_path("/problem/<int>", &get_problem, db_connection_ptr, _1);
 RouterBuilder::add_path("/set-problem", &set_problem, request, json_params, db_connection_ptr);
 RouterBuilder::add_path("/add-problem", &add_problem, request, json_params, db_connection_ptr);
-// RouterBuilder::add_path("/page-problems", &get_problems_gpt, db_connection_ptr, std::string{"1"});
-// RouterBuilder::add_path("/page-problems/<int>", &get_problems_gpt, db_connection_ptr, _1);
+RouterBuilder::add_path("/del-problem", &del_problem, request, json_params, db_connection_ptr);
+
+// RouterBuilder::add_path("/page-problems", &get_problems_page, db_connection_ptr, std::string{"1"});
+// RouterBuilder::add_path("/page-problems/<int>", &get_problems_page, db_connection_ptr, _1);
 INIT_END
