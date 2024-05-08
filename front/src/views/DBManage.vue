@@ -1,44 +1,44 @@
-<script setup>
-import MyNavBar from "@/components/MyNavBar.vue";
-import SoftButton from "@/components/SoftButton.vue";
+<script setup lang="ts">
+import MyNavBar from "../components/MyNavBar.vue";
+import SoftButton from "../components/SoftButton.vue";
 
-import { onMounted, ref } from "vue";
+import { onMounted,onBeforeUnmount, ref } from "vue";
 import { useStore } from "vuex";
 
-const store = useStore();
+const store = useStore()
 const body = document.getElementsByTagName("body")[0];
 
 onMounted(() => {
-  store.commit("noWrappers");
+  store.commit('toggleEveryDisplay')
+  store.commit('toggleHideConfig')
   body.classList.remove("bg-gray-100");
+})
 
-  getProblemCount();
-  getProblem(1);
-});
+onBeforeUnmount(() => {
+  store.commit('toggleEveryDisplay')
+  store.commit('toggleHideConfig')
+  body.classList.add("bg-gray-100");
+})
+
+
 
 const count = ref(10);
-
-const pid = ref(0);
+const pid = ref(0); // 数据库中的id
 const category = ref("default");
 const problem = ref("loading...");
 const solution1 = ref("loading...");
 const solution2 = ref("loading...");
 
 import axios from "axios";
-const getProblemCount = () => {
-  axios.get('api/count-problems', { headers: { Authorization: localStorage.token } })
+const getProblemCount = () =>
+  axios.get('api/count-problems')
     .then(res => {
       console.log(res.data);
       count.value = res.data.count;
-    })
-    .catch(err => {
-      console.log(err);
+    }).catch(err => { console.log(err); });
 
-    });
-};
-const getProblem = (id) => {
-  console.log("getProblem", id);
-  axios.get('api/problem/' + (id - 1), { headers: { Authorization: localStorage.token } })
+const getProblem = (id) =>
+  axios.get('api/problem/' + (id - 1))
     .then(res => {
       console.log(res.data);
       pid.value = res.data.id;
@@ -46,29 +46,30 @@ const getProblem = (id) => {
       problem.value = res.data.problem;
       solution1.value = res.data.solution1;
       solution2.value = res.data.solution2;
-    })
-    .catch(err => {
-      console.log(err);
+    }).catch(err => { console.log(err); });
 
-    });
-};
-
-const setProblem = () => {
+const setProblem = () =>
   axios.post('api/set-problem', {
     id: pid.value,
     category: category.value,
+    personality: "default",
+    history: "none",
     problem: problem.value,
     solution1: solution1.value,
     solution2: solution2.value
-  }, { headers: { Authorization: localStorage.token } })
-    .then(res => {
-      console.log(res.data);
-    })
-    .catch(err => {
-      console.log(err);
+  }).then(res => { console.log(res.data); })
+    .catch(err => { console.log(err); });
 
-    });
-};
+const newProblem = () =>
+  axios.post('api/add-problem', {
+    category: category.value,
+    personality: "default",
+    history: "none",
+    problem: problem.value,
+    solution1: solution1.value,
+    solution2: solution2.value
+  }).then(res => { console.log(res.data); getProblemCount() })
+    .catch(err => { console.log(err); });
 
 const currentPage = ref(1);
 const handleCurrentChange = (val) => {
@@ -76,6 +77,9 @@ const handleCurrentChange = (val) => {
   getProblem(val);
 };
 
+
+getProblemCount();
+  getProblem(1);
 </script>
 
 <template>
@@ -88,30 +92,75 @@ const handleCurrentChange = (val) => {
 
   <div class="mb-7"/>
 
-  <div class="row" :style="{ marginLeft: '1rem', marginRight: '1rem' }">
+
+  <div class="row margin-lr">
     <div class="col-12 col-lg-4">
-      <input v-model="problem" class="form-control" />
+      <textarea v-model="problem" class="form-control long" autosize/>
+      <span class="bottom-bar">
+        <input class="form-control" v-model="category" placeholder="Category" />
+      </span>
     </div>
     <div class="col-12 col-lg-4">
-      <input v-model="solution1" class="form-control" />
+      <textarea v-model="solution1" class="form-control long" autosize/>
+      <span class="bottom-bar">
+        <SoftButton class="bottom-bar
+        " @click="setProblem"> Save </SoftButton>
+      </span>
     </div>
     <div class="col-12 col-lg-4">
-      <input v-model="solution2" class="form-control" />
+      <textarea v-model="solution2" class="form-control long" autosize/>
+      <span class="bottom-bar">
+        <SoftButton class="bottom-bar
+        " @click="newProblem"> New </SoftButton>
+      </span>
     </div>
   </div>
 
-  <div class="mb-2"/>
-
-  <div class="row" :style="{ marginLeft: '1rem', marginRight: '1rem' }">
-    <el-pagination :current-page="currentPage" @update:current-page="handleCurrentChange" :total="count" :default-page-size="1" />
+  <div class="row margin-lr">
+    <el-pagination :current-page="currentPage" @update:current-page="handleCurrentChange" :total="count"
+      :default-page-size="1" :style="{marginTop: '0.5rem'}"/>
   </div>
 </template>
 
 <style scoped>
+.margin-lr {
+  margin-left: 1rem;
+  margin-right: 1rem;
+}
+
 .el-card {
-  /* margin-bottom: 1rem; */
+  margin-top: 0rem;
+  margin-bottom: 0.5rem;
   white-space: pre-wrap;
-  max-height: 80vh;
+  max-height: 78vh;
   overflow-y: auto;
 }
+
+.bottom-bar {
+  height: 2rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.long {
+  width: 100%;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 8px;
+  box-sizing: border-box;
+  height: auto;
+  min-height: 40vh;
+  overflow-y: auto;
+  max-height: 78vh;
+  box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.2); /* 增加阴影范围 */
+  margin-bottom: 0.5rem;
+}
+
+.bottom-bar input.form-control {
+  height: 2rem;
+  margin-top: 1rem;
+}
+
 </style>

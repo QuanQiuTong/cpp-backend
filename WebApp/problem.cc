@@ -63,7 +63,7 @@ db_relation_to_object orm_problem{
 static boost::json::array get_problems(dbptr conn)
 {
 	db_transaction tx{conn};
-	db_result r = tx.exec("select * from problems");
+	db_result r = tx.exec("select * from problems order by id asc");
 	lginfo << r.query();
 	return orm_problem.convert_to_array(r);
 }
@@ -77,7 +77,7 @@ static object count_problems(dbptr conn) {
 static object get_problem(dbptr conn, const std::string& id)
 {
 	db_transaction tx{ conn };
-	db_result r = tx.exec("select * from problems limit 1 offset ?;", std::stoi(id));
+	db_result r = tx.exec("SELECT * FROM problems ORDER BY id LIMIT 1 OFFSET ?;", std::stoi(id));
 	tx.commit();
 	lginfo << r.query();
 	if (r.empty())

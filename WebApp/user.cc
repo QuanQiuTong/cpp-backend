@@ -45,10 +45,10 @@ object signup(request_type &request, object &&params, std::shared_ptr<db_connect
 
 	db_transaction tx{conn};
 	if (get_user(tx, username))
-		return {{"status", "error"}, {"message", "user already exists"}};
+		return { {"code", 1}, {"message", "user already exists"} };
 	tx.exec("INSERT INTO users (username, password, email) VALUES (?, ?, ?)", username, encrypted, email);
 	tx.commit();
-	return {{"status", "ok"}};
+	return { {"code", 0}, {"message", "sign up success"} };
 }
 
 object signin(request_type &request, object &&params, std::shared_ptr<db_connection> conn)
@@ -61,15 +61,16 @@ object signin(request_type &request, object &&params, std::shared_ptr<db_connect
 	auto _user = get_user(tx, username);
 	if (!_user)
 		return {
-			{"success", false},
+			{"code", 1},
 			{"message", "user not found"}};
 	auto user = _user.value();
 
 	auto encoded_password = user["password"].as_string();
 	if (!utils::security::check_password(password.c_str(), encoded_password.c_str()))
 		return {
-			{"success", false},
+			{"code", 1},
 			{"message", "wrong password"}};
+	user.insert({ { "code",0 } });
 	return user;
 }
 

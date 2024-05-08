@@ -1,21 +1,25 @@
 <script setup lang="ts">
-import MyNavBar from "@/components/MyNavBar.vue";
-import SoftButton from "@/components/SoftButton.vue";
-import Markdown from "@/components/Markdown.vue";
+import MyNavBar from "../components/MyNavBar.vue";
+import SoftButton from "../components/SoftButton.vue";
+import Markdown from "../components/Markdown.vue";
 
-import { onMounted, ref } from "vue";
+import { onMounted,onBeforeUnmount, ref } from "vue";
 import { useStore } from "vuex";
 
-onMounted(() => {
-  const store = useStore();
-  const body = document.getElementsByTagName("body")[0];
-  // 取消侧边栏和上下
-  store.commit("noWrappers");
-  body.classList.remove("bg-gray-100");
+const store = useStore()
+const body = document.getElementsByTagName("body")[0];
 
-  getProblemCount();
-  getProblem(1);
-});
+onMounted(() => {
+  store.commit('toggleEveryDisplay')
+  store.commit('toggleHideConfig')
+  body.classList.remove("bg-gray-100");
+})
+
+onBeforeUnmount(() => {
+  store.commit('toggleEveryDisplay')
+  store.commit('toggleHideConfig')
+  body.classList.add("bg-gray-100");
+})
 
 
 
@@ -38,6 +42,7 @@ const getProblem = (id) =>
   axios.get('api/problem/' + (id - 1))
     .then(res => {
       console.log(res.data);
+      pid.value = res.data.id;
       category.value = res.data.category;
       problem.value = res.data.problem;
       solution1.value = res.data.solution1;
@@ -48,11 +53,14 @@ const setProblem = () =>
   axios.post('api/set-problem', {
     id: pid.value,
     category: category.value,
+    personality: "default",
+    history: "none",
     problem: problem.value,
     solution1: solution1.value,
     solution2: solution2.value
   }).then(res => { console.log(res.data); })
     .catch(err => { console.log(err); });
+
 const annotation =
   (pid: number, uid: number, judge: string, reason: string) =>
     axios.post('/api/annotation', {
@@ -71,18 +79,29 @@ const handleCurrentChange = (val) => {
   getProblem(val);
 };
 const check1 = () => {
-  if (!localStorage.user_id)
+  let id = sessionStorage.getItem("user_id");
+  if(!id) id = localStorage.getItem("user_id");
+  if (!id)
     return alert("Please login first");
-  annotation(pid.value, localStorage.user_id, "1", "");
+  annotation(pid.value, parseInt(id), "1", "");
+  currentPage.value++;
+  getProblem(currentPage.value);
 }
 const check2 = () => {
-  if (!localStorage.user_id)
+  let id = sessionStorage.getItem("user_id");
+  if(!id) id = localStorage.getItem("user_id");
+  if (!id)
     return alert("Please login first");
-  annotation(pid.value, localStorage.user_id, "2", "");
+  annotation(pid.value, parseInt(id), "2", "");
+  currentPage.value++;
+  getProblem(currentPage.value);
 }
 
 const manage = ref(false);
 
+
+getProblemCount();
+  getProblem(1);
 </script>
 
 <template>
@@ -124,16 +143,20 @@ const manage = ref(false);
 
   <div class="row margin-lr" v-show="manage">
     <div class="col-12 col-lg-4">
-      <input v-model="problem" class="form-control long" />
+      <textarea v-model="problem" class="form-control long" autosize/>
       <span class="bottom-bar">
-        <input class="form-control" v-model="category" placeholder="Category"/>
+        <input class="form-control" v-model="category" placeholder="Category" />
       </span>
     </div>
     <div class="col-12 col-lg-4">
-      <input v-model="solution1" class="form-control long" />
+      <textarea v-model="solution1" class="form-control long" autosize/>
+      <span class="bottom-bar">
+        <SoftButton class="bottom-bar
+        " @click="setProblem"> Save </SoftButton>
+      </span>
     </div>
     <div class="col-12 col-lg-4">
-      <input v-model="solution2" class="form-control long" />
+      <textarea v-model="solution2" class="form-control long" autosize/>
     </div>
   </div>
 
@@ -180,8 +203,12 @@ const manage = ref(false);
   border-radius: 4px;
   padding: 8px;
   box-sizing: border-box;
-  min-height: 10rem; /* 设置最小高度 */
+  height: auto;
+  min-height: 40vh;
+  overflow-y: auto;
+  max-height: 78vh;
   box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.2); /* 增加阴影范围 */
+  margin-bottom: 0.5rem;
 }
 
 .bottom-bar input.form-control {
