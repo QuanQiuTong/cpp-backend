@@ -39,6 +39,7 @@ export default defineConfig({
     // /** 设置 host: true 才可以使用 Network 的形式，以 IP 访问项目 */
     // host: true, // host: "0.0.0.0"
     cors: true,
+    port: 3000,
     proxy: {
         "/api": {
             target: "http://127.0.0.1:8080",

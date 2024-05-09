@@ -7,6 +7,7 @@ import Profile from "@/views/Profile.vue";
 import Rtl from "@/views/Rtl.vue";
 import SignIn from "@/views/SignIn.vue";
 import SignUp from "@/views/SignUp.vue";
+import { ElMessage } from 'element-plus'
 
 const routes = [
   {
@@ -86,6 +87,7 @@ const routes = [
       sessionStorage.removeItem('token');
       localStorage.removeItem('token');
       next('/sign-in');
+      ElMessage.success('Succeccfully Signed Out!')
     }
   },
 ];

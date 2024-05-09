@@ -2,7 +2,7 @@
   <MyNavBar btn-background="bg-gradient-primary" />
   <div class="pt-5 m-3 page-header align-items-start min-vh-50 pb-11 border-radius-lg" :style="{
     backgroundImage:
-      'url(' + require('@/assets/img/curved-images/curved6.jpg') + ')',
+      'url(' + backgroundImage + ')',
   }">
     <span class="mask bg-gradient-dark opacity-6"></span>
     <div class="container">
@@ -56,6 +56,7 @@
 </template>
 
 <script setup>
+import backgroundImage from "@/assets/img/curved-images/curved6.jpg";
 import AppFooter from "@/examples/PageLayout/Footer.vue";
 import SoftInput from "@/components/SoftInput.vue";
 import SoftCheckbox from "@/components/SoftCheckbox.vue";

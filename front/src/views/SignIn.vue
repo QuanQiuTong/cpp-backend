@@ -50,8 +50,7 @@
               <div class="top-0 oblique position-absolute h-100 d-md-block d-none me-n8">
                 <div class="bg-cover oblique-image position-absolute fixed-top ms-auto h-100 z-index-0 ms-n6" :style="{
             backgroundImage:
-              'url(' +
-              require('@/assets/img/curved-images/curved9.jpg') +
+              'url(' + backgroundImage +
               ')',
           }"></div>
               </div>
@@ -65,6 +64,7 @@
 </template>
 
 <script setup>
+import backgroundImage from "@/assets/img/curved-images/curved9.jpg";
 import Navbar from "@/examples/PageLayout/Navbar.vue";
 import AppFooter from "@/examples/PageLayout/Footer.vue";
 import SoftInput from "@/components/SoftInput.vue";
@@ -112,7 +112,7 @@ const handleSubmit = (e) => {
       sessionStorage.user_id = res.data.id;
       if(e.target.rememberMe.checked)
         localStorage.user_id = res.data.id;
-      else localStorage.user_id = undefined;
+      else localStorage.removeItem('user_id');
 
       router.push('/');
     })
