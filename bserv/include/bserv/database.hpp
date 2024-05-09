@@ -451,6 +451,7 @@ namespace bserv {
 			}
 			if (idx != param_vec.size())
 				throw invalid_operation_exception{ "too many parameters" };
+			puts(query.c_str());
 			return tx_.exec(query);
 		}
 		void commit() { tx_.commit(); }

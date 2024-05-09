@@ -55,11 +55,6 @@ const routes = [
     component: SignUp,
   },
   {
-    path: "/translate",
-    name: "Translate",
-    component: () => import("@/views/Translate.vue"),
-  },
-  {
     path: "/user",
     name: "User",
     component: () => import("@/views/User.vue"),

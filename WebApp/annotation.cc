@@ -50,7 +50,7 @@ boost::json::object annotation(
         params["reason"].as_string());
     tx.commit();
     return {
-		{"status", "ok"},
+		{"code", 0},
 		{"message", "annotation added"}
 	};
 }
@@ -67,17 +67,32 @@ boost::json::object del_annotation(
     tx.exec("delete from annotation where id = ?", get_int(params, "id"));
     tx.commit();
     return {
-    {"status", "ok"},
+    {"code", 0},
     {"message", "annotation deleted"}
   };
 }
 
 bserv::json::object count_annotations(
+  bserv::request_type& request,
+  boost::json::object&& params,
   std::shared_ptr<bserv::db_connection> conn)
 {
-	bserv::db_transaction tx{conn};
-	auto res = tx.exec("select count(*) from annotation");
-	return { {"count", res.front()[0].as<size_t>()}};
+    auto pid = get_int(params, "problem_id");
+    auto uid = get_int(params, "user_id");
+    std::string order_by = params.at("order_by").as_string().c_str();
+    std::string order = params.at("order").as_string().c_str();
+
+    std::string query = "select count(*) from annotation ";
+    if (pid != 0 && uid != 0)
+        query += "where problem_id = " + std::to_string(pid) + " and user_id = " + std::to_string(uid);
+    else if (pid != 0)
+        query += "where problem_id = " + std::to_string(pid);
+    else if (uid != 0)
+        query += "where user_id = " + std::to_string(uid);
+
+    bserv::db_transaction tx{ conn };
+    auto res = tx.exec(query);
+    return { {"count", res.front()[0].as<size_t>()}};
 }
 
 bserv::db_relation_to_object orm_annotation{
@@ -89,19 +104,33 @@ bserv::db_relation_to_object orm_annotation{
     bserv::make_db_field<std::string>("created_at")
 };
 
+#include <iostream>
+
 boost::json::array annotations(
   bserv::request_type& request,
   boost::json::object&& params,
   std::shared_ptr<bserv::db_connection> conn,
   std::string page_id)
 {
-	if (request.method() != boost::beast::http::verb::get)
-	throw bserv::url_not_found_exception{};
-  
     auto id = std::stoll(page_id);
 
+    auto pid = get_int(params, "problem_id");
+    auto uid = get_int(params, "user_id");
+    std::string order_by = params.at("order_by").as_string().c_str();
+    std::string order = params.at("order").as_string().c_str();
+
+    std::string query = "select * from annotation ";
+    if(pid != 0 && uid != 0)
+		query += "where problem_id = " + std::to_string(pid) + " and user_id = " + std::to_string(uid);
+	else if(pid != 0)
+		query += "where problem_id = " + std::to_string(pid);
+	else if(uid != 0)
+		query += "where user_id = " + std::to_string(uid);
+
+    query += " order by " + order_by + " " + order + " limit 10 offset " + std::to_string((id - 1) * 10);
+
 	bserv::db_transaction tx{conn};
-    auto res = tx.exec("select * from annotation order by id desc limit 10 offset ?", (id - 1) * 10);
+    auto res = tx.exec(query);
 
 	return orm_annotation.convert_to_array(res);
 }
@@ -110,7 +139,7 @@ INIT_BEGIN
 using namespace bserv::placeholders;
 RouterBuilder::add_path("/annotation", &annotation, request, json_params, db_connection_ptr);
 RouterBuilder::add_path("/del-annotation", &del_annotation, request, json_params, db_connection_ptr);
-RouterBuilder::add_path("/count-annotations", &count_annotations, db_connection_ptr);
+RouterBuilder::add_path("/count-annotations", &count_annotations, request, json_params, db_connection_ptr);
 RouterBuilder::add_path("/annotations", &annotations, request, json_params, db_connection_ptr, std::string{"1"});
 RouterBuilder::add_path("/annotations/<int>", &annotations, request, json_params, db_connection_ptr, bserv::placeholders::_1);
 INIT_END
