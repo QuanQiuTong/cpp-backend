@@ -46,10 +46,17 @@
                             Sign In
                         </router-link>
                     </li>
+                    <li class="nav-item">
+                        <router-link class="nav-link me-2" to="/sign-out">
+                            <i class="fas fa-sign-out-alt opacity-6 me-1" aria-hidden="true"
+                                :class="isBlur ? 'text-dark' : 'text-white'"></i>
+                            Sign Out
+                        </router-link>
+                    </li>
                 </ul>
                 <ul class="navbar-nav d-lg-block d-none">
                     <li class="nav-item">
-                        <a href="https://github.com/Tarjan01/mobileInternet"
+                        <a href="https://github.com/QuanQiuTong/cpp-backend"
                             class="btn btn-sm btn-round mb-0 me-1"
                             :class="isBlur ? 'bg-gradient-dark' : 'bg-gradient-success'">View GitHub</a>
                     </li>

@@ -104,8 +104,6 @@ bserv::db_relation_to_object orm_annotation{
     bserv::make_db_field<std::string>("created_at")
 };
 
-#include <iostream>
-
 boost::json::array annotations(
   bserv::request_type& request,
   boost::json::object&& params,

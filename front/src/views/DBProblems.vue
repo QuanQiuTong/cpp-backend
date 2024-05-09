@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script setup>
 import MyNavBar from "../components/MyNavBar.vue";
 import SoftButton from "../components/SoftButton.vue";
 import Markdown from "../components/Markdown.vue";
@@ -61,8 +61,7 @@ const setProblem = () =>
   }).then(res => { console.log(res.data); })
     .catch(err => { console.log(err); });
 
-const annotation =
-  (pid: number, judge: string, reason: string) =>{
+const annotation = (pid, judge, reason) =>{
     let id = sessionStorage.getItem("user_id");
     if(!id) id = localStorage.getItem("user_id");
     if (!id) return alert("Please login first");
@@ -157,7 +156,7 @@ getProblemCount();
     </div>
   </div>
 
-  <div class="row margin-lr">
+  <div class="row margin-lr" >
     <el-pagination :current-page="currentPage" @update:current-page="handleCurrentChange" :total="count"
       :default-page-size="1" :style="{marginTop: '0.5rem'}"/>
   </div>

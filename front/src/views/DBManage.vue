@@ -1,6 +1,7 @@
-<script setup lang="ts">
+<script setup>
 import MyNavBar from "../components/MyNavBar.vue";
 import SoftButton from "../components/SoftButton.vue";
+import { ElMessage } from 'element-plus'
 
 import { onMounted,onBeforeUnmount, ref } from "vue";
 import { useStore } from "vuex";
@@ -57,7 +58,7 @@ const setProblem = () =>
     problem: problem.value,
     solution1: solution1.value,
     solution2: solution2.value
-  }).then(res => { console.log(res.data); })
+  }).then(res => { console.log(res.data); ElMessage.success('Saved!');})
     .catch(err => { console.log(err); });
 
 const delProblem = () =>{
@@ -70,6 +71,7 @@ const delProblem = () =>{
     if(currentPage.value > 1)
       currentPage.value -= 1;
     getProblem(currentPage.value);
+    ElMessage.warning('Deleted!');
   })
     .catch(err => { console.log(err); });}
 
@@ -86,6 +88,7 @@ const newProblem = () =>
     await getProblemCount();
     currentPage.value = count.value;
     getProblem(currentPage.value);
+    ElMessage('New Problem Created.');
   })
   .catch(err => { console.log(err); });
 

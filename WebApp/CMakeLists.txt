@@ -1,9 +1,10 @@
 add_executable(
 	WebApp
 	
-	handlers.cpp
-	rendering.cpp
-	WebApp.cpp
+	user.cc
+	problem.cc
+	annotation.cc
+	main.cpp
 )
 
 target_include_directories(

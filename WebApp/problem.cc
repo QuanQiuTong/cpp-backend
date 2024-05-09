@@ -88,8 +88,6 @@ static object get_problem(dbptr conn, const std::string& id)
 {
 	db_transaction tx{ conn };
 	db_result r = tx.exec("SELECT * FROM problems ORDER BY id LIMIT 1 OFFSET ?;", std::stoi(id));
-	tx.commit();
-	lginfo << r.query();
 	if (r.empty())
 		throw url_not_found_exception{};
 	return orm_problem.convert_row(r.front());
@@ -112,12 +110,9 @@ static object set_problem(request_type& req, object&& params, dbptr conn)
 	db_result r = tx.exec(
 		"update problems set category = ?, personality = ?, history = ?, problem = ?, solution1 = ?, solution2 = ? where id = ?",
 		category, personality, history, problem, solution1, solution2, id);
-	lginfo << r.query();
 	tx.commit();
 
-	return {
-		{"code", 0},
-		{"message", "update success"} };
+	return { {"code", 0}, {"message", "update success"} };
 }	
 
 static object add_problem(request_type &req, object &&params, dbptr conn)
@@ -137,7 +132,6 @@ static object add_problem(request_type &req, object &&params, dbptr conn)
 			"insert into problems (category, personality, history, problem, solution1, solution2) "
 			"values (?, ?, ?, ?, ?, ?)",
 			category, personality, history, problem, solution1, solution2);
-		lginfo << r.query();
 		tx.commit();
 
 	return {
@@ -150,9 +144,7 @@ static object del_problem(request_type &req, object &&params, dbptr conn)
 	if (req.method() != boost::beast::http::verb::post)
 		throw url_not_found_exception{};
 
-	std::cout<<"del_problem"<<std::endl;
 	auto id = get_int(params, "id");
-	std::cout<<"id:"<<id<<std::endl;
 
 	db_transaction tx{conn};
 	tx.exec("delete from annotation where problem_id = ?", id); // foreign key

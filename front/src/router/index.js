@@ -1,4 +1,4 @@
-import { createRouter, createWebHistory } from "vue-router";
+import { createRouter, createWebHistory, createWebHashHistory } from "vue-router";
 import Dashboard from "@/views/Dashboard.vue";
 import Tables from "@/views/Tables.vue";
 import Billing from "@/views/Billing.vue";
@@ -78,6 +78,15 @@ const routes = [
     path: "/list",
     name: "List",
     component: () => import("@/views/DBList.vue"),
+  },
+  {
+    path: '/sign-out',
+    name: 'Sign Out',
+    beforeEnter: (to, from, next) => {
+      sessionStorage.removeItem('token');
+      localStorage.removeItem('token');
+      next('/sign-in');
+    }
   },
 ];
 
