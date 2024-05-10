@@ -158,7 +158,7 @@ getProblemCount();
 
   <div class="row margin-lr" >
     <el-pagination :current-page="currentPage" @update:current-page="handleCurrentChange" :total="count"
-      :default-page-size="1" :style="{marginTop: '0.5rem'}"/>
+      :default-page-size="1" :pager-count="21" :style="{marginTop: '0.5rem'}"/>
   </div>
 </template>
 

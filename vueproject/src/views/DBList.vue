@@ -51,7 +51,7 @@ const props = () => {
   }
 }
 
-const count = ref(40);
+const count = ref(40), count1 = ref(0), count2 = ref(0);
 
 const getTableData = () => {
   console.log(props());
@@ -60,6 +60,8 @@ const getTableData = () => {
     .then(res => {
       console.log(res.data);
       count.value = res.data.count;
+      count1.value = res.data.count1;
+      count2.value = res.data.count2;
     }).catch(err => { console.log(err); });
 
   axios.post('api/annotations/'+ currentPage.value, props())
@@ -122,9 +124,10 @@ const remove = (row) => {
       <!-- <span>User: </span> -->
       <input v-model="inputUid" type="text" class="form-control" placeholder="User ID" />
     </div>
-    <div class="col-2">
+    <div class="col-1">
      <SoftButton @click="query">Query</SoftButton>
     </div>
+    <div class="col-2">&nbsp; Sol1: {{count1}}, &nbsp; Sol2: {{count2}}</div>
   </div>
 
   <el-table :data="tableData" stripe class="margin-lr" @sort-change="handleSortChange">

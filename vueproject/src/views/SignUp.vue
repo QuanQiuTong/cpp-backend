@@ -88,6 +88,14 @@ import MyNavBar from "../components/MyNavBar.vue";
 const router = useRouter()
 const handleSubmit = (e) => {
   e.preventDefault()
+  if(e.target.name.value.length < 3) {
+    alert('Username must be at least 3 characters')
+    return
+  }
+  if(e.target.password.value.length < 6) {
+    alert('Password must be at least 6 characters')
+    return
+  }
   axios.post('api/signup',{
       username: e.target.name.value,
       email: e.target.email.value,

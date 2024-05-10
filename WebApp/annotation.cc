@@ -91,8 +91,21 @@ bserv::json::object count_annotations(
         query += "where user_id = " + std::to_string(uid);
 
     bserv::db_transaction tx{ conn };
-    auto res = tx.exec(query);
-    return { {"count", res.front()[0].as<size_t>()}};
+    auto count = tx.exec(query).front()[0].as<size_t>();
+    auto count1 = tx.exec(
+        "select count(*) from annotation "
+        "where judgement like '%1%' "
+        + (pid != 0 ? "and problem_id = " + std::to_string(pid) : std::string{" "})
+        + (uid != 0 ? "and user_id = " + std::to_string(uid) : std::string{" "})
+    ).front()[0].as<size_t>();
+    auto count2 = tx.exec(
+        "select count(*) from annotation "
+        "where judgement like '%2%' "
+        + (pid != 0 ? "and problem_id = " + std::to_string(pid) : std::string{ " " })
+        + (uid != 0 ? "and user_id = " + std::to_string(uid) : std::string{ " " })
+    ).front()[0].as<size_t>();
+
+    return { {"count", count}, {"count1", count1}, {"count2", count2} };
 }
 
 bserv::db_relation_to_object orm_annotation{
